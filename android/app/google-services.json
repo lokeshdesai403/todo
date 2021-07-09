@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "585953441079",
+    "project_id": "makemylist-958a6",
+    "storage_bucket": "makemylist-958a6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:585953441079:android:3019a8d1580b9a88a116b2",
+        "android_client_info": {
+          "package_name": "com.makemylist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "585953441079-gbgqbsjgdrpqtt8qliiiarl5jgaa086p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8T_xgZqO6FRpci6AKKmADqqARxf7AwSQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "585953441079-gbgqbsjgdrpqtt8qliiiarl5jgaa086p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
