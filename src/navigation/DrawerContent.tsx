@@ -1,15 +1,13 @@
-import React from 'react';
-import {View, Image, TouchableOpacity, Alert} from 'react-native';
-import {Drawer} from 'react-native-paper';
+import React, {useEffect, useState} from 'react';
+import { View, Image, TouchableOpacity, Alert } from 'react-native';
+import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
+import auth from '@react-native-firebase/auth';
+import { Drawer } from 'react-native-paper';
+import { Constants } from '../constants';
 import Theme from '../theme/Theme';
-import {Constants} from '../constants';
-import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
 import styles from './styles';
 
 export function DrawerContent(props: any) {
-  // let userType = props.userType
-  // let isAdmin = props.isAdmin
-
   const doLogOut = () => {
     Alert.alert(
       'Logout',
@@ -21,12 +19,26 @@ export function DrawerContent(props: any) {
         },
         {
           text: 'Logout',
-          onPress: () => {},
+          onPress: () => {userLogout()},
         },
       ],
       {cancelable: true},
     );
   };
+
+  const userLogout = () => {
+    auth()
+      .signOut()
+      .then(() => {
+        props.navigation.reset({
+          index: 0,
+          routes: [{
+            name: Constants.SPLASH_SCREEN,
+          }],
+        });
+        console.log('User signed out!')
+      });
+  }
 
   return (
     <View style={styles.flexStyle}>
@@ -49,10 +61,10 @@ export function DrawerContent(props: any) {
           <DrawerItem
             label="Home"
             labelStyle={styles.drawerLabelStyle}
-            icon={({size}) => (
+            icon={({ size }) => (
               <Image
                 resizeMode={'contain'}
-                style={{width: size, height: size}}
+                style={{ width: size, height: size }}
                 source={Theme.icons.ic_icon_drawer}
               />
             )}
@@ -63,10 +75,10 @@ export function DrawerContent(props: any) {
           <DrawerItem
             label={Constants.SETTINGS_SCREEN}
             labelStyle={styles.drawerLabelStyle}
-            icon={({size}) => (
+            icon={({ size }) => (
               <Image
                 resizeMode={'contain'}
-                style={{width: size, height: size}}
+                style={{ width: size, height: size }}
                 source={Theme.icons.ic_icon_drawer}
               />
             )}

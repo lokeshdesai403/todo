@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Text, SafeAreaView, FlatList, View, Image, TouchableOpacity, TextInput, ScrollView, AsyncStorage } from 'react-native';
+import { Text, SafeAreaView, FlatList, View, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import Moment from 'moment';
 import { CustomButton } from '../../components';
@@ -14,6 +16,8 @@ export default function TasksScreenMain(_props: any) {
   // ##### Main Const #####
   let sheetAddItem: any = useRef();
   const [textFirebaseToken, setTextFirebaseToken] = useState<string>('');
+  const [textUserEmail, setTextUserEmail] = useState<string>('');
+  const [textUserId, setTextUserId] = useState<string>('');
   const [listTasksMain, setListTasksMain] = useState<InterFaceTypeData[]>([]);
   const [listTasksType, setListTasksType] = useState<InterFaceTypeData[]>([]);
 
@@ -54,14 +58,31 @@ export default function TasksScreenMain(_props: any) {
         setListTasksMain(newFinalList)
       });
 
+    // const newFinalList: InterFaceTypeData[] = []
+    //   data.map(async (item: any) => {
+    //     item.image = '/taskTypeImages/' + item.image;
+    //     const ref = storage().ref(item.image);
+    //     item.image = await ref.getDownloadURL();
+    //     newFinalList.push(item)
+    //   })
+    //   setListTasksMain(newFinalList)
+
     return () => unsubscribe()
   }, []);
 
   const getFirebaseToken = async () => {
     try {
-      const value = await AsyncStorage.getItem('fcmToken');
-      if (value !== null) {
-        setTextFirebaseToken(value)
+      const fcmToken = await AsyncStorage.getItem('fcmToken');
+      const userEmail = await AsyncStorage.getItem('userEmail');
+      const userId = await AsyncStorage.getItem('userId');
+      if (fcmToken !== null) {
+        setTextFirebaseToken(fcmToken)
+      }
+      if (userEmail !== null) {
+        setTextUserEmail(userEmail)
+      }
+      if (userId !== null) {
+        setTextUserId(userId)
       }
     } catch (error) {
       // Error retrieving data
@@ -142,7 +163,7 @@ export default function TasksScreenMain(_props: any) {
   };
 
   const handleConfirmReminder = (time: any) => {
-    Moment.locale('en')    
+    Moment.locale('en')
     var tm = Moment(time).format('DD - MM - YYYY  hh:mm A')
     setTextRemindMe(tm)
     setTextFinalRemindMe(time)
@@ -159,6 +180,9 @@ export default function TasksScreenMain(_props: any) {
     } else if (typeTask === 'string') {
       tasks = item.tasks;
     }
+    
+    // console.log("FFFF ::: " + JSON.stringify(item));
+    console.log("FFFF ::: " + JSON.stringify(item.image));
 
     return (
       <TouchableOpacity style={styles.cardListMain} onPress={() => {
@@ -171,7 +195,7 @@ export default function TasksScreenMain(_props: any) {
             <Image
               style={styles.tasksIconStyle}
               resizeMode={'contain'}
-              source={item.image}
+              source={{ uri: item.image }}
             />
           </View>
           <View style={{ flex: 2, alignItems: 'center', justifyContent: 'center' }}>
@@ -211,7 +235,7 @@ export default function TasksScreenMain(_props: any) {
 
   // ##### Add Update Data #####
   const addUpdateDataToList = () => {
-    
+
     listTasksMain.map((objectData) => {
       if (objectData.title === 'All Tasks' || objectData.title === textAddType) {
         let num: any = objectData.tasks
@@ -237,11 +261,13 @@ export default function TasksScreenMain(_props: any) {
       type: textAddType,
       color: colorAddType,
       isChecked: false,
+      userEmail: textUserEmail,
+      userId: textUserId,
       created_at: firestore.FieldValue.serverTimestamp(),
       reminder_at: dateFinal,
       updated_at: firestore.FieldValue.serverTimestamp(),
     }
-    
+
     firestore()
       .collection('TodoTaskList')
       .add(dataObject)
@@ -249,14 +275,14 @@ export default function TasksScreenMain(_props: any) {
         scheduleNotification(dataObject);
         console.log('Data added!');
       });
-    
+
 
     sheetAddItem.current.close()
   }
 
   const scheduleNotification = (data: any) => {
     console.log(JSON.stringify(data));
-    
+
   }
   // #####
 

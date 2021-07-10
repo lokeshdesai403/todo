@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -8,9 +8,10 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import firestore from '@react-native-firebase/firestore';
 import Moment from 'moment';
-import {InterFaceListData, InterFaceTypeData} from '../../staticData';
+import { InterFaceListData, InterFaceTypeData } from '../../staticData';
 import Theme from '../../theme/Theme';
 import styles from './styles';
 
@@ -23,51 +24,82 @@ export default function HomeScreen(_props: any) {
 
   // ##### Use Effect #####
   useEffect(() => {
-
-    Moment.locale('en')
-    var today = Moment(Date.now()).format('DD - MM - YYYY')
-    // console.log("> > > > > >" + JSON.stringify(today));
-    
-    
-    const getList = firestore()
-      .collection('TodoTaskList')
-      .orderBy("created_at", "asc")
-      .onSnapshot(snap => {
-        const data: any = []
-        snap.docs.map((doc) => {
-          const item = doc.data();
-          item.id = doc.id;
-          data.push(item)
-        })
-        const newFinalList: InterFaceListData[] = data
-        setListOfTodayData(newFinalList)
-      });
-
-    const data: any = []
-    const getCount = firestore()
-      .collection('TaskTypeList')
-      .orderBy("created_at", "asc")
-      .onSnapshot(snap => {
-        snap.docs.map((doc) => {
-          const item = doc.data();
-          item.id = doc.id;
-          data.push(item)
-        })
-
-        const newListType: InterFaceTypeData[] = []
-        data.map((dataObject: any) => {
-          if (dataObject.title !== 'All Tasks' && dataObject.title !== 'Add Tasks') {
-            newListType.push(dataObject)
-          }
-        })
-        setListOfDataCount(newListType)
-
-        const newFinalList: InterFaceTypeData[] = data
-        setListOfAllDataCount(newFinalList)
-      });
-
-    return () => { getList(), getCount() }
+    getUserDetails()
   }, [])
+
+  const getUserDetails = async () => {
+    try {
+      const userEmail = await AsyncStorage.getItem('userEmail');
+      const userId = await AsyncStorage.getItem('userId');
+
+      console.log(JSON.stringify(userEmail));
+      console.log(JSON.stringify(userId));
+
+
+      Moment.locale('en')
+      var today = Moment(Date.now()).format('DD - MM - YYYY')
+
+      const getList = firestore()
+        .collection('TodoTaskList')
+        .orderBy("created_at", "asc")
+        .onSnapshot(snap => {
+          const data: any = []
+          snap.docs.map((doc) => {
+            const item = doc.data();
+            item.id = doc.id;
+            data.push(item)
+          })
+          const newFinalList: InterFaceListData[] = data
+          setListOfTodayData(newFinalList)
+        });
+
+      // const getList = firestore()
+      //   .collection('TodoTaskList')
+      //   .where("userEmail", "==", userEmail)
+      //   .orderBy("created_at", "asc")
+      //   .get()
+      //   .then(snap => {
+      //     const data: any = []
+      //     snap.docs.map((doc) => {
+      //       const item = doc.data();
+      //       item.id = doc.id;
+      //       data.push(item)
+      //     })
+      //     const newFinalList: InterFaceListData[] = data
+      //     setListOfTodayData(newFinalList)
+      //   });
+
+
+      const data: any = []
+      const getCount = firestore()
+        .collection('TaskTypeList')
+        .orderBy("created_at", "asc")
+        .onSnapshot(snap => {
+          snap.docs.map((doc) => {
+            const item = doc.data();
+            item.id = doc.id;
+            data.push(item)
+          })
+
+          const newListType: InterFaceTypeData[] = []
+          data.map((dataObject: any) => {
+            if (dataObject.title !== 'All Tasks' && dataObject.title !== 'Add Tasks') {
+              newListType.push(dataObject)
+            }
+          })
+          setListOfDataCount(newListType)
+
+          const newFinalList: InterFaceTypeData[] = data
+          setListOfAllDataCount(newFinalList)
+        });
+
+      return () => { getList(), getCount() }
+
+    } catch (error) {
+      // Error retrieving data
+    }
+  };
+
   // #####
 
   // ##### Update - Delete Data #####
@@ -143,7 +175,7 @@ export default function HomeScreen(_props: any) {
     } else if (typeTask === 'string') {
       tasks = item.tasks;
     }
-    
+
     return (
       <View style={styles.cardTopList}>
         <View style={{ flex: 3 }}>

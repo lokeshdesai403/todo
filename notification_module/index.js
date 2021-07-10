@@ -12,7 +12,7 @@ const message = {
         title: 'Make My List - TASK',
         body: 'PERSONAL::: Proident enim fugiat ex cupidatat eiusmod duis culpa.',
     },
-    token: 'fpkJeavtRBmyucTh87toGr:APA91bFOFJ4y7prDOWfo-SuvBW65BYQBzA09nRfctnVIm1mH_su5-68qVTvn-yvp0P4woF7ZwXnUqJKWCOuXjUR5FatGh7UDUnjObPDt_Bifp0INg6Rz9vPZvxTxGGRaCygS8t8uZJu8',
+    token: 'cFHewynKR86enGMHT_KYV2:APA91bFagRBvQyMjrh2VdBpwENnQ_ol7fjN2kJMxXjbkJ6C1efr4NiRX9lpHDEJsT-5eXC-ZSWYMBlyA54K8p0QV8YmsBrPaj-WYnaPIsfJSxYPfC3EWgzZ2EiaC1mWBuroLR8I2fbQC',
 }
 
 admin.messaging().send(message).then(res => {

@@ -1,6 +1,6 @@
-import {SplashScreen} from './auth';
+import {SplashScreen, LoginScreen, RegisterScreen} from './auth';
 import {HomeScreen} from './homeScreen';
 import {TasksScreenMain} from './tasksScreen';
 import {SettingsScreen} from './settingsScreen';
 
-export {SplashScreen, HomeScreen, TasksScreenMain, SettingsScreen};
+export {SplashScreen, LoginScreen, RegisterScreen, HomeScreen, TasksScreenMain, SettingsScreen};

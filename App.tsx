@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
-import { StatusBar, Alert, AsyncStorage } from 'react-native';
+import { StatusBar, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
 import { AuthStackNavigation } from './src/navigation';

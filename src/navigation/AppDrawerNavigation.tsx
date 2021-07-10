@@ -1,10 +1,10 @@
 import React from 'react';
 import {Image, TouchableOpacity, Text} from 'react-native';
-import {DrawerActions} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
-import {Constants} from '../constants';
+import {DrawerActions} from '@react-navigation/native';
 import {AppTabNavigation, DrawerContent} from './';
 import {SettingsScreen} from '../screens';
+import {Constants} from '../constants';
 import Theme from '../theme/Theme';
 import styles from './styles';
 

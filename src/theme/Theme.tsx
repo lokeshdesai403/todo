@@ -14,6 +14,7 @@ const Theme = {
     appRed: '#FF4646',
     appGray1: '#747474',
     appGray: '#9B9B9B',
+    appLink: '#007AFF',
     navigation: '#f3f3f3',
     buttonBorderColor: '#DEDEDE',
   },
