@@ -16,49 +16,43 @@ export default function SplashScreen(_props: any) {
 
   // ##### Use Effect #####
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    let user: any;
+    const subscriber = auth().onAuthStateChanged((item: any) => {
+      user = item
+    });
+
+    Animated.parallel([
+      Animated.timing(slideAnimationValue, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setTimeout(() => {
+        if (!user) {
+          _props.navigation.replace(Constants.LOGIN_SCREEN);
+        } else {
+          _props.navigation.reset({
+            index: 0,
+            routes: [{
+              name: Constants.HOME_SCREEN,
+            }],
+          });
+        }
+      }, 2000);
+    })
 
     return subscriber();
   }, []);
   // #####
 
   const onAuthStateChanged = (user: any) => {
-    setUser(user);
-    if (initializing) setInitializing(false);
+    // setUser(user);
+
+    
   }
 
-  if (initializing) return null;
 
-  if (!user) {
-    Animated.parallel([
-      Animated.timing(slideAnimationValue, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setTimeout(() => {
-        _props.navigation.replace(Constants.LOGIN_SCREEN);
-      }, 2000);
-    })
-  } else {
-    Animated.parallel([
-      Animated.timing(slideAnimationValue, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setTimeout(() => {
-        _props.navigation.reset({
-          index: 0,
-          routes: [{
-            name: Constants.HOME_SCREEN,
-          }],
-        });
-      }, 2000);
-    })
-  }
 
   return (
     <>
