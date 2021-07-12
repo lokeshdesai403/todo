@@ -1,10 +1,13 @@
 import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
 import { StatusBar, Alert } from 'react-native';
+import PushNotificationIOS from "@react-native-community/push-notification-ios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
+import PushNotification from "react-native-push-notification";
 import messaging from '@react-native-firebase/messaging';
 import { AuthStackNavigation } from './src/navigation';
+import Firebase from '@react-native-firebase/app';
 import Theme from './src/theme/Theme';
 
 const App: () => React$Node = () => {
@@ -37,13 +40,12 @@ const App: () => React$Node = () => {
       let message: any = remoteMessage;
       let title: string = message.notification.title;
       let body: string = message.notification.body;
-      
+
       Alert.alert(
         title,
         body
       );
-
-
+      
     });
 
     return unsubscribe;
@@ -75,7 +77,7 @@ const App: () => React$Node = () => {
   const storeData = async (fcmToken: any) => {
     // console.log("TOKEN" + fcmToken);
     try {
-      await AsyncStorage.setItem( 'fcmToken', fcmToken );
+      await AsyncStorage.setItem('fcmToken', fcmToken);
       retrieveData()
     } catch (error) {
       // Error saving data

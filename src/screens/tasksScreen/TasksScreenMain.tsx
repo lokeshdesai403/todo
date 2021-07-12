@@ -4,7 +4,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
+import messaging from '@react-native-firebase/messaging';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import Moment from 'moment';
 import { CustomButton } from '../../components';
@@ -15,6 +15,8 @@ import styles from './styles';
 export default function TasksScreenMain(_props: any) {
   // ##### Main Const #####
   let sheetAddItem: any = useRef();
+  const [loading, setLoading] = useState<boolean>(false);
+
   const [textFirebaseToken, setTextFirebaseToken] = useState<string>('');
   const [textUserEmail, setTextUserEmail] = useState<string>('');
   const [textUserId, setTextUserId] = useState<string>('');
@@ -26,8 +28,11 @@ export default function TasksScreenMain(_props: any) {
   const [textAddTitle, setTextAddTitle] = useState<string>('');
   const [textAddDate, setTextAddDate] = useState<string>('DD - MM - YYYY');
   const [textAddTime, setTextAddTime] = useState<string>('hh:mm A');
+  const [textCreatedAtDate, setTextCreatedAtDate] = useState<string>('');
+
   const [textAddType, setTextAddType] = useState<string>('Other');
   const [colorAddType, setColorAddType] = useState<string>(Theme.colors.appGray1);
+
   const [textRemindMe, setTextRemindMe] = useState<string>('DD - MM - YYYY  hh:mm A');
   const [textFinalRemindMe, setTextFinalRemindMe] = useState<string>('');
   // #####
@@ -35,6 +40,7 @@ export default function TasksScreenMain(_props: any) {
   // ##### Use Effect #####
   useEffect(() => {
     const data: any = []
+    setLoading(true)
     getFirebaseToken()
     const unsubscribe = firestore()
       .collection('TaskTypeList')
@@ -56,21 +62,16 @@ export default function TasksScreenMain(_props: any) {
 
         const newFinalList: InterFaceTypeData[] = data
         setListTasksMain(newFinalList)
-      });
 
-    // const newFinalList: InterFaceTypeData[] = []
-    //   data.map(async (item: any) => {
-    //     item.image = '/taskTypeImages/' + item.image;
-    //     const ref = storage().ref(item.image);
-    //     item.image = await ref.getDownloadURL();
-    //     newFinalList.push(item)
-    //   })
-    //   setListTasksMain(newFinalList)
+
+        setLoading(false)
+      });
 
     return () => unsubscribe()
   }, []);
 
   const getFirebaseToken = async () => {
+
     try {
       const fcmToken = await AsyncStorage.getItem('fcmToken');
       const userEmail = await AsyncStorage.getItem('userEmail');
@@ -95,41 +96,22 @@ export default function TasksScreenMain(_props: any) {
   const showDatePicker = () => { setDatePickerVisible(true) }
   const hideDatePicker = () => { setDatePickerVisible(false) }
 
-  const [isTimePickerVisible, setTimePickerVisible] = useState(false)
-  const showTimePicker = () => { setTimePickerVisible(true) }
-  const hideTimePicker = () => { setTimePickerVisible(false) }
-
   const [isReminderPickerVisible, setReminderPickerVisible] = useState(false)
   const showReminderPicker = () => { setReminderPickerVisible(true) }
   const hideReminderPicker = () => { setReminderPickerVisible(false) }
 
-  const renderDate = () => {
+  const renderDateTime = () => {
     let text: any = Moment(Date.now()).format('MMMM DD, YYYY hh:mm:ss')
     // console.log(text);
     let date: Date = new Date(text);
     return (
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
-        mode="date"
+        mode="datetime"
         minimumDate={date}
         headerTextIOS="Pick a Date"
-        onConfirm={(date) => { handleConfirmDate(date) }}
+        onConfirm={(date) => { handleConfirmDateTime(date) }}
         onCancel={hideDatePicker}
-      />)
-  }
-
-  const renderTime = () => {
-    let text: any = Moment(Date.now()).format('MMMM DD, YYYY hh:mm:ss')
-    // console.log(text);
-    let date: Date = new Date(text);
-    return (
-      <DateTimePickerModal
-        isVisible={isTimePickerVisible}
-        mode="time"
-        minimumDate={date}
-        headerTextIOS="Pick a Time"
-        onConfirm={(time) => { handleConfirmTime(time) }}
-        onCancel={hideTimePicker}
       />)
   }
 
@@ -148,18 +130,14 @@ export default function TasksScreenMain(_props: any) {
       />)
   }
 
-  const handleConfirmDate = (date: any) => {
+  const handleConfirmDateTime = (dateTime: any) => {
     Moment.locale('en')
-    var dt = Moment(date).format('DD - MM - YYYY')
+    var dt = Moment(dateTime).format('DD - MM - YYYY')
     setTextAddDate(dt)
-    hideDatePicker()
-  };
-
-  const handleConfirmTime = (time: any) => {
-    Moment.locale('en')
-    var tm = Moment(time).format('hh:mm A')
+    var tm = Moment(dateTime).format('hh:mm A')
     setTextAddTime(tm)
-    hideTimePicker()
+    setTextCreatedAtDate(dateTime)
+    hideDatePicker()
   };
 
   const handleConfirmReminder = (time: any) => {
@@ -180,9 +158,9 @@ export default function TasksScreenMain(_props: any) {
     } else if (typeTask === 'string') {
       tasks = item.tasks;
     }
-    
+
     // console.log("FFFF ::: " + JSON.stringify(item));
-    console.log("FFFF ::: " + JSON.stringify(item.image));
+    // console.log("FFFF ::: " + JSON.stringify(item.image));
 
     return (
       <TouchableOpacity style={styles.cardListMain} onPress={() => {
@@ -236,7 +214,8 @@ export default function TasksScreenMain(_props: any) {
   // ##### Add Update Data #####
   const addUpdateDataToList = () => {
 
-    listTasksMain.map((objectData) => {
+    const List = listTasksMain
+    List.map((objectData) => {
       if (objectData.title === 'All Tasks' || objectData.title === textAddType) {
         let num: any = objectData.tasks
         let itemTasks: number = num + 1;
@@ -253,8 +232,11 @@ export default function TasksScreenMain(_props: any) {
       }
     })
 
-    let date: any = textFinalRemindMe
-    let dateFinal: Date = date;
+    let createDate: any = textCreatedAtDate
+    let createDateFinal: Date = createDate
+
+    let reminderDate: any = textFinalRemindMe
+    let reminderDateFinal: Date = reminderDate
 
     let dataObject = {
       title: textAddTitle,
@@ -263,9 +245,9 @@ export default function TasksScreenMain(_props: any) {
       isChecked: false,
       userEmail: textUserEmail,
       userId: textUserId,
-      created_at: firestore.FieldValue.serverTimestamp(),
-      reminder_at: dateFinal,
-      updated_at: firestore.FieldValue.serverTimestamp(),
+      created_at: createDateFinal,
+      reminder_at: reminderDateFinal,
+      updated_at: createDateFinal,
     }
 
     firestore()
@@ -281,8 +263,7 @@ export default function TasksScreenMain(_props: any) {
   }
 
   const scheduleNotification = (data: any) => {
-    console.log(JSON.stringify(data));
-
+    console.log("+-+-+-+-+-+-+-+- " + JSON.stringify(data));
   }
   // #####
 
@@ -320,22 +301,20 @@ export default function TasksScreenMain(_props: any) {
                     <Text style={styles.textSheet}>{'Task Time'}</Text>
                   </View>
                 </View>
-                <View style={{ flexDirection: 'row' }}>
-                  <TouchableOpacity style={{ flex: 1, marginHorizontal: 5 }} onPress={() => {
-                    showDatePicker()
-                  }}>
+                <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => {
+                  showDatePicker()
+                }}>
+                  <View style={{ flex: 1, marginHorizontal: 5 }}>
                     <View style={[styles.viewBgSelector, { justifyContent: 'center' }]}>
                       <Text style={styles.textSheet}>{textAddDate}</Text>
                     </View>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={{ flex: 1, marginHorizontal: 5 }} onPress={() => {
-                    showTimePicker()
-                  }}>
+                  </View>
+                  <View style={{ flex: 1, marginHorizontal: 5 }}>
                     <View style={[styles.viewBgSelector, { justifyContent: 'center' }]}>
                       <Text style={styles.textSheet}>{textAddTime}</Text>
                     </View>
-                  </TouchableOpacity>
-                </View>
+                  </View>
+                </TouchableOpacity>
               </View>
               <View style={{ marginVertical: 5 }}>
                 <View style={{ justifyContent: 'center', flex: 1, marginHorizontal: 10 }}>
@@ -402,8 +381,7 @@ export default function TasksScreenMain(_props: any) {
         />
       </SafeAreaView>
       {CategoriesListSheet()}
-      {renderDate()}
-      {renderTime()}
+      {renderDateTime()}
       {renderReminder()}
     </>
   );

@@ -32,8 +32,8 @@ export default function HomeScreen(_props: any) {
       const userEmail = await AsyncStorage.getItem('userEmail');
       const userId = await AsyncStorage.getItem('userId');
 
-      console.log(JSON.stringify(userEmail));
-      console.log(JSON.stringify(userId));
+      console.log(userEmail);
+      console.log(userId);
 
 
       Moment.locale('en')
@@ -41,7 +41,8 @@ export default function HomeScreen(_props: any) {
 
       const getList = firestore()
         .collection('TodoTaskList')
-        .orderBy("created_at", "asc")
+        // .orderBy("created_at", "asc")
+        .where("userEmail", "==", userEmail)
         .onSnapshot(snap => {
           const data: any = []
           snap.docs.map((doc) => {
@@ -52,23 +53,6 @@ export default function HomeScreen(_props: any) {
           const newFinalList: InterFaceListData[] = data
           setListOfTodayData(newFinalList)
         });
-
-      // const getList = firestore()
-      //   .collection('TodoTaskList')
-      //   .where("userEmail", "==", userEmail)
-      //   .orderBy("created_at", "asc")
-      //   .get()
-      //   .then(snap => {
-      //     const data: any = []
-      //     snap.docs.map((doc) => {
-      //       const item = doc.data();
-      //       item.id = doc.id;
-      //       data.push(item)
-      //     })
-      //     const newFinalList: InterFaceListData[] = data
-      //     setListOfTodayData(newFinalList)
-      //   });
-
 
       const data: any = []
       const getCount = firestore()
